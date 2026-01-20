@@ -20,3 +20,11 @@ Route::middleware('jwt')->group(function () {
 // Forget Password
 Route::post('forget_password', [PasswordResetController::class, 'send_reset_code']);
 Route::post('reset_password', [PasswordResetController::class, 'reset_password']);
+
+// Category Routes
+Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
+
+// Product Routes
+Route::get('/products', [App\Http\Controllers\ProductController::class, 'index']);
+Route::get('/products/{id}', [App\Http\Controllers\ProductController::class, 'show']);
+Route::get('/categories/{category_id}/products', [App\Http\Controllers\ProductController::class, 'get_products_by_category']);
