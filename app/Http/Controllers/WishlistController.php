@@ -2,28 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class WishlistController extends Controller
 {
     public function index()
     {
-        $wishlists = Wishlist::with('product')->where('user_id', auth()->id())->get();
+        $wishlists = Product::whereHas('wishlists', function ($query) {
+            $query->where('user_id', auth()->id());
+        })->get()->map(function ($product) {
+            return [
+                'id'          => $product->id,
+                'name'        => $product->name,
+                'title'       => $product->title,
+                'description' => $product->description,
+                'price'       => $product->price,
+                'discount'    => $product->discount,
+                'category_id' => $product->category_id,
+                'avg_rating'  => $product->avg_rating,
+                'count_rating'=> $product->count_rating,
+                'stock'       => $product->stock,
+                'images'      => json_decode($product->images, true),
+            ];
+        });
         return response()->json($wishlists);
     }
 
     public function addToWishlist(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
         ]);
 
-        $wishlist = Wishlist::firstOrCreate(
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
+
+        Wishlist::firstOrCreate(
             ['user_id' => auth()->id(), 'product_id' => $request->product_id]
         );
 
-        return response()->json(['message' => 'Product added to wishlist', 'wishlist' => $wishlist]);
+        return response()->json(['message' => 'Product added to wishlist']);
     }
 
     public function removeFromWishlist($id)

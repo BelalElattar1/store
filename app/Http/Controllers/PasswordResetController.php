@@ -1,18 +1,19 @@
 <?php
 
-namespace App\services\password; 
+namespace App\Http\Controllers; 
 
 use Exception;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\PasswordResetCode;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class PasswordResetController {
 
-    public function send_reset_code($request) {
+    public function send_reset_code(Request $request) {
 
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:50|exists:users,email',
@@ -41,7 +42,7 @@ class PasswordResetController {
 
     }
 
-    public function reset_password($request) {
+    public function reset_password(Request $request) {
 
         $validator = Validator::make($request->all(), [
             'email'     => 'required|string|email|max:50|exists:password_reset_codes,email',

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
@@ -13,12 +14,16 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'address' => 'required|string|min:5|max:255'
         ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
 
         $user = User::create([
             'name'     => $request->name,
@@ -87,7 +92,7 @@ class AuthController extends Controller
             $user->update([
                 'name'     => $request->name,
                 'password' => Hash::make($request->password),
-                'address'  => $request->name
+                'address'  => $request->address
             ]);
             return response()->json($user);
         } catch (JWTException $e) {
